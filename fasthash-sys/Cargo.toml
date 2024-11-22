@@ -12,9 +12,6 @@ version = "0.4.1"
 
 [features]
 default = ["native", "all"]
-
-gen = ["bindgen"]
-
 aes = []
 avx = []
 avx2 = ["avx"]
@@ -65,8 +62,8 @@ xx = []
 cfg-if = "1.0"
 
 [build-dependencies]
-bindgen = {version = "0.59", optional = true}
+bindgen = "0.70"
 cargo-emit = "0.2"
-cc = "1.0"
-lazy_static = "1.4"
+cc = "1.2"
+lazy_static = "1.5"
 raw-cpuid = "10"

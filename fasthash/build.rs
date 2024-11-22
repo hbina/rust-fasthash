@@ -1,5 +1,6 @@
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 fn main() {
-    let cpuid = raw_cpuid::CpuId::new();
+    let cpuid = raw_cpuid::CpuId::default();
 
     if cfg!(feature = "native") {
         if let Some(features) = cpuid.get_feature_info() {
@@ -24,3 +25,6 @@ fn main() {
         }
     }
 }
+
+#[cfg(target_arch = "aarch64")]
+fn main() {}

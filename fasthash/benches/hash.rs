@@ -173,7 +173,7 @@ fn bench_hash64(c: &mut Criterion) {
             });
     }
 
-    if cfg!(any(feature = "sse4.2", target_feature = "sse4.2")) {
+    if cfg!(any(feature = "sse42", target_feature = "sse2")) {
         bench = bench
             .with_function("metro_crc_1", move |b, &&size| {
                 b.iter(|| metro::crc::Hash64_1::hash_with_seed(&DATA[..size], SEED as _));
@@ -235,7 +235,7 @@ fn bench_hash128(c: &mut Criterion) {
         });
     }
 
-    if cfg!(any(feature = "sse4.2", target_feature = "sse4.2")) {
+    if cfg!(any(feature = "sse42", target_feature = "sse2")) {
         bench = bench
             .with_function("city_crc", move |b, &&size| {
                 b.iter(|| city::crc::Hash128::hash_with_seed(&DATA[..size], SEED as _));

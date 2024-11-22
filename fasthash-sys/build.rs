@@ -2,14 +2,30 @@ use std::env;
 use std::path::Path;
 
 use lazy_static::lazy_static;
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use raw_cpuid::{CpuId, ExtendedFeatures, FeatureInfo};
 
+#[cfg(target_arch = "aarch64")]
+use raw_cpuid::{ExtendedFeatures, FeatureInfo};
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 lazy_static! {
     static ref CPU_ID: CpuId = CpuId::new();
     static ref CPU_FEATURES: Option<FeatureInfo> = CPU_ID.get_feature_info();
     static ref CPU_EXTENDED_FEATURES: Option<ExtendedFeatures> = CPU_ID.get_extended_feature_info();
     static ref TARGET_FEATURES: Vec<String> = env::var("CARGO_CFG_TARGET_FEATURE")
         .map_or_else(|_| vec![], |s| s.split(',').map(|s| s.to_owned()).collect());
+    static ref TARGET_ARCH: String = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    static ref TARGET_ENV: String = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+}
+
+#[cfg(target_arch = "aarch64")]
+lazy_static! {
+    // static ref CPU_ID: CpuId = CpuId::new();
+    static ref CPU_FEATURES: Option<FeatureInfo> = None;
+    static ref CPU_EXTENDED_FEATURES: Option<ExtendedFeatures> = None;
+    static ref TARGET_FEATURES: Vec<String> = vec![];
     static ref TARGET_ARCH: String = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     static ref TARGET_ENV: String = env::var("CARGO_CFG_TARGET_ENV").unwrap();
 }
@@ -74,12 +90,7 @@ fn support_avx2() -> bool {
     cfg!(feature = "avx2") || has_target_feature("avx2") || has_avx2()
 }
 
-#[cfg(all(not(feature = "gen"), any(target_os = "macos", target_os = "linux")))]
-fn generate_binding(_out_file: &Path) {
-    cargo_emit::warning!("pregenerated binding file.");
-}
-
-#[cfg(any(feature = "gen", not(any(target_os = "macos", target_os = "linux"))))]
+// #[cfg(any(not(any(target_os = "macos", target_os = "linux"))))]
 fn generate_binding(out_file: &Path) {
     let _ = bindgen::builder()
         .clang_args(&["-x", "c++", "-std=c++11"])
@@ -364,7 +375,6 @@ fn build_fasthash() {
             build.flag("-mavx2");
         }
     }
-
     build.static_flag(true).compile("fasthash");
 }
 
@@ -454,6 +464,7 @@ fn build_highway() {
     build.static_flag(true).compile("highwayhash");
 }
 
+// #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 fn main() {
     if has_aesni() {
         cargo_emit::rustc_cfg!(r#"feature="aes""#);
@@ -484,9 +495,6 @@ fn main() {
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_file = Path::new(&out_dir).join("fasthash.rs");
-
-    cargo_emit::rerun_if_changed!("src/fasthash.hpp");
-    cargo_emit::rerun_if_changed!("src/fasthash.cpp");
 
     generate_binding(&out_file);
 }

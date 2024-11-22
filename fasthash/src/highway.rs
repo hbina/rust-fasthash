@@ -22,7 +22,7 @@ use crate::FastHash;
 
 /// 256-bit secret key that should remain unknown to attackers.
 /// We recommend initializing it to a random value.
-pub type Seed = ffi::HHKey;
+pub type Seed = [u64; 4];
 
 /// `HighwayHash` 64-bit hash functions for a byte array.
 ///
@@ -170,7 +170,7 @@ impl FastHash for Hash128 {
     #[inline(always)]
     fn hash_with_seed<T: AsRef<[u8]>>(bytes: T, seed: Self::Seed) -> Self::Hash {
         let bytes = bytes.as_ref();
-        let mut hash: ffi::HHResult128 = [0; 2];
+        let mut hash: [u64; 2] = [0; 2];
 
         unsafe {
             ffi::HighwayHash128(

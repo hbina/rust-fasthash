@@ -374,8 +374,9 @@ pub mod t1ha1 {
 pub mod t1ha0 {
     use crate::hasher::FastHash;
 
+    #[cfg(feature = "aes")]
     lazy_static::lazy_static! {
-        static ref T1HA0: ffi::t1ha0_function_t = unsafe { ffi::t1ha0_resolve() };
+        static ref T1HA0: ffi::t1ha0_function_t = unsafe { ffi::t1ha_resolve() };
     }
 
     /// `T1Hash` 64-bit hash functions.
@@ -401,8 +402,16 @@ pub mod t1ha0 {
 
         #[inline(always)]
         fn hash_with_seed<T: AsRef<[u8]>>(bytes: T, seed: u64) -> u64 {
+            #[cfg(feature = "aes")]
             unsafe {
                 T1HA0.unwrap_or(ffi::t1ha0_64)(
+                    bytes.as_ref().as_ptr() as *const _,
+                    bytes.as_ref().len(),
+                    seed,
+                )
+            }
+            unsafe {
+                ffi::t1ha0_64(
                     bytes.as_ref().as_ptr() as *const _,
                     bytes.as_ref().len(),
                     seed,

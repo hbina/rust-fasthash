@@ -469,8 +469,8 @@ mod tests {
         assert!(u0 != 0);
         assert!(u1 != 0);
         assert!(u2 != 0);
-        assert_eq!(u0, u1 as _);
-        assert_eq!(u1, (u2 >> 64) as _);
+        assert_eq!(u0, u1 as u32);
+        assert_eq!(u1, (u2 >> 64) as u64);
 
         s = Seed::gen();
 
@@ -483,9 +483,9 @@ mod tests {
         assert!(u0 != 0);
         assert!(u1 != 0);
         assert!(u2 != 0);
-        assert!(u1 != u0 as _);
-        assert!(u1 != u2 as _);
-        assert!(u1 != (u2 >> 64) as _);
+        assert!(u1 != u0 as u64);
+        assert!(u1 != u2 as u64);
+        assert!(u1 != (u2 >> 64) as u64);
 
         u0 = Seed::gen().into();
         u1 = Seed::gen().into();
@@ -494,9 +494,9 @@ mod tests {
         assert!(u0 != 0);
         assert!(u1 != 0);
         assert!(u2 != 0);
-        assert!(u1 != u0 as _);
-        assert!(u1 != u2 as _);
-        assert!(u1 != (u2 >> 64) as _);
+        assert!(u1 != u0 as u64);
+        assert!(u1 != u2 as u64);
+        assert!(u1 != (u2 >> 64) as u64);
     }
 
     macro_rules! test_hashmap_with_fixed_state {
@@ -546,7 +546,7 @@ mod tests {
         #[cfg(feature = "farm")]
         test_hashmap_with_hashers![farm::Hash32, farm::Hash64, farm::Hash128];
 
-        #[cfg(feature = "lookup")]
+        #[cfg(feature = "lookup3")]
         test_hashmap_with_hashers![lookup3::Hash32];
 
         #[cfg(feature = "metro")]
